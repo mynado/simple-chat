@@ -34,7 +34,11 @@ io.on('connection', (socket) => {
 
 	socket.on('chatmsg', (msg) => {
 		debug("Someone sent something nice", msg);
-		io.emit('chatmsg', msg);
+		//// emit to all connected sockets
+		//io.emit('chatmsg', msg);
+
+		// broadcast to all connected sockets EXCEPT ourselves
+		socket.broadcast.emit('chatmsg', msg);
 	});
 });
 
