@@ -9,7 +9,7 @@ let username = null;
 
 const addNoticeToChat = (notice) => {
 	const noticeEl = document.createElement('li');
-	noticeEl.classList.add('list-group-item', 'list-group-item-light', 'notice');
+	noticeEl.classList.add('notice');
 
 	noticeEl.innerHTML = notice;
 
@@ -17,12 +17,16 @@ const addNoticeToChat = (notice) => {
 }
 
 const addMessageToChat = (msg, ownMsg = false) => {
+	console.log(msg);
 	const msgEl = document.createElement('li');
-	msgEl.classList.add('list-group-item', 'message');
-	msgEl.classList.add(ownMsg ? 'list-group-item-primary' : 'list-group-item-secondary');
+	msgEl.classList.add('message');
+	if (ownMsg) {
+		msgEl.classList.add('you');
+	}
 
-	const username = ownMsg ? 'You' : msg.username;
-	msgEl.innerHTML = `<span class="user">${username}:</span> ${msg.content}`;
+	msgEl.innerHTML = ownMsg
+		? msg.content
+		: `<span class="user">${username}:</span> <span class="content">${msg.content}</span> <span class="time">${moment(msg.time).format('hh:mm:ss')}</span>`;
 
 	document.querySelector('#messages').appendChild(msgEl);
 }
@@ -52,13 +56,16 @@ messageForm.addEventListener('submit', e => {
 	e.preventDefault();
 
 	const messageEl = document.querySelector('#message');
+	if (!messageEl.value) {
+		return;
+	}
 	const msg = {
 		content: messageEl.value,
-		username: document.querySelector('#username').value,
 	}
 	socket.emit('chatmsg', msg);
 	addMessageToChat(msg, true);
 	messageEl.value = '';
+	messageEl.focus();
 
 });
 
