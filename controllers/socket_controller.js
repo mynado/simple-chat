@@ -3,7 +3,22 @@
  */
 
 const debug = require('debug')('09-simple-chat:socket_controller');
+const rooms = [
+	{
+		name: "general",
+		users: {},
+	},
+	{
+		name: "lieutenant",
+		users: {},
+	},
+	{
+		name: "private",
+		users: {},
+	},
+];
 const users = {};
+
 let io = null;
 
 /**
@@ -11,6 +26,13 @@ let io = null;
  */
 function getOnlineUsers() {
 	return Object.values(users);
+}
+
+/**
+ * Get room names
+ */
+function getListOfRoomNames() {
+	return rooms.map(room => room.name);
 }
 
 /**
@@ -51,11 +73,22 @@ function handleChatMsg(incomingMsg) {
 }
 
 /**
+ * Handle a request for rooms
+ */
+function handleGetRoomList(callback) {
+	callback(getListOfRoomNames());
+}
+
+/**
  * Handle register new user
  */
 
-function handleRegisterUser(username, callback) {
-	debug(`User ${username} connected to the chat`);
+function handleRegisterUser(room, username, callback) {
+	debug(`User ${username} want to connect to the room ${room}`);
+
+	// join the requested room
+	this.join(room);
+
 	users[this.id] = username;
 	callback({
 		joinChat: true,
@@ -63,11 +96,15 @@ function handleRegisterUser(username, callback) {
 		onlineUsers: getOnlineUsers(),
 	})
 
-	// broadcast to all connected sockets EXCEPT ourselves
-	this.broadcast.emit('new-user-connected', username);
+	// broadcast to all connected sockets in the room EXCEPT ourselves
+	this.broadcast.to(room).emit('new-user-connected', username);
+	// // broadcast to all connected sockets EXCEPT ourselves
+	// this.broadcast.emit('new-user-connected', username);
 
-	// broadcast online users to all connected sockets EXCEPT ourselves
-	this.broadcast.emit('online-users', getOnlineUsers());
+	// broadcast to all connected sockets in the room EXCEPT ourselves
+	this.broadcast.to(room).emit('online-users', username);
+	// // broadcast online users to all connected sockets EXCEPT ourselves
+	// this.broadcast.emit('online-users', getOnlineUsers());
 }
 
 // använder function declaration för att kunna binda this
@@ -80,5 +117,7 @@ module.exports = function(socket) {
 
 	socket.on('chatmsg', handleChatMsg);
 
-	socket.on('register-user', handleRegisterUser)
+	socket.on('get-room-list', handleGetRoomList);
+
+	socket.on('register-user', handleRegisterUser);
 }
