@@ -43,6 +43,31 @@
 	flex-grow: 1;
 }
 
+#messages {
+	list-style-type: none;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	padding: 0;
+}
+
+#messages li {
+	align-self: flex-start;
+	margin: 0.15rem;
+}
+
+#messages .message {
+	padding: 0.5rem 0.75rem;
+	background-color: #d3d3d3;
+	border-radius: 0.75rem;
+}
+
+#messages .you {
+	background-color: cornflowerblue;
+	color: white;
+	align-self: flex-end;
+}
+
 #users {
 	flex-basis: 20%;
 }
