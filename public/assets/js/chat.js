@@ -26,7 +26,7 @@ const addMessageToChat = (msg, ownMsg = false) => {
 
 	msgEl.innerHTML = ownMsg
 		? msg.content
-		: `<span class="user">${username}:</span> <span class="content">${msg.content}</span> <span class="time">${moment(msg.time).format('hh:mm:ss')}</span>`;
+		: `<span class="user">${msg.username}:</span> <span class="content">${msg.content}</span> <span class="time">${moment(msg.time).format('HH:mm:ss')}</span>`;
 
 	document.querySelector('#messages').appendChild(msgEl);
 }
