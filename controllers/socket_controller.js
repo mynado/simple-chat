@@ -4,6 +4,7 @@
 
 const debug = require('debug')('09-simple-chat:socket_controller');
 const users = {};
+let io = null;
 
 /**
  * Get username of online user
@@ -17,15 +18,18 @@ function getOnlineUsers() {
  */
 
 function handleUserDisconnect() {
-	debug("Someone left the chat");
+	debug("Client disconnected");
 
 	// broadcast to all connected sockets that this user has left the chat
 	if (users[this.id]) {
 		this.broadcast.emit('user-disconnected', users[this.id]);
-	}
 
-	// remove user from list of connected users
-	delete users[this.id];
+		// remove user from list of connected users
+		delete users[this.id];
+
+		// broadcast online users to all connected sockets EXCEPT ourselves
+		this.broadcast.emit('online-users', getOnlineUsers());
+	}
 }
 
 /**
@@ -61,9 +65,10 @@ function handleRegisterUser(username, callback) {
 	this.broadcast.emit('online-users', getOnlineUsers());
 }
 
-// använder function declaration för att kunna bonda this
+// använder function declaration för att kunna binda this
 module.exports = function(socket) {
 	// this = io
+	io = this;
 	debug(`Client ${socket.id} connecting`);
 
 	socket.on('disconnect', handleUserDisconnect);
